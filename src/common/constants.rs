@@ -15,6 +15,7 @@ pub struct Env {
     pub telegram_chat_id: String,
     pub use_alert: bool,
     pub debug: bool,
+    pub mev_opportunity_log_path: String,
 }
 
 impl Env {
@@ -29,6 +30,7 @@ impl Env {
             telegram_chat_id: get_env("TELEGRAM_CHAT_ID"),
             use_alert: get_env("USE_ALERT").parse::<bool>().unwrap(),
             debug: get_env("DEBUG").parse::<bool>().unwrap(),
+            mev_opportunity_log_path: get_env("MEV_OPPORTUNITY_LOG_PATH"),
         }
     }
 }

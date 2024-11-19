@@ -6,14 +6,19 @@ use ethers::{
 };
 use log::{info, warn};
 use std::str::FromStr;
+use std::path::PathBuf;
 use std::{collections::HashMap, sync::Arc};
 
+
+use crate::common::utils::{get_token_balance, log_sandwich_data_to_csv, get_default_sandwich_log_path};
 use crate::common::alert::Alert;
 use crate::common::constants::*;
 use crate::common::execution::{Executor, SandoBundle};
 use crate::common::streams::NewBlock;
-use crate::common::utils::get_token_balance;
 use crate::sandwich::simulation::{BatchSandwich, PendingTxInfo, Sandwich};
+
+pub const DEFAULT_LOG_DIR: &str = "logs";
+pub const SANDWICH_LOG_FILENAME: &str = "sandwich_data.csv";
 
 pub async fn get_token_balances(
     provider: &Arc<Provider<Ws>>,
@@ -82,6 +87,7 @@ pub async fn main_dish(
     promising_sandwiches: &HashMap<H256, Vec<Sandwich>>,
     simulated_bundle_ids: &mut BoundedVecDeque<String>,
     pending_txs: &HashMap<H256, PendingTxInfo>,
+    log_dir: Option<PathBuf>,
 ) -> Result<()> {
     let env = Env::new();
 
@@ -324,12 +330,38 @@ pub async fn main_dish(
             continue;
         }
         let sando_bundle = sando_bundle.unwrap();
+        let sando_bundle_clone = sando_bundle.clone();
         match send_sando_bundle_request(&executor, sando_bundle, new_block.block_number, &alert)
             .await
         {
             Err(e) => warn!("send_sando_bundle_request error: {e:?}"),
             _ => {}
         }
+        // cached for logging
+        let bundle_request = executor.to_sando_bundle_request(sando_bundle_clone, new_block.block_number, 1).await?;
+        let bundle_request_json = serde_json::to_string(&bundle_request).unwrap_or_default();
+        let log_path = log_dir.clone().unwrap_or_else(|| get_default_sandwich_log_path());
+
+        if let Err(e) = log_sandwich_data_to_csv(
+            log_path.to_str().unwrap(),
+            new_block.block_number,
+            final_batch_sandwich.sandwiches.len(),
+            &bundle_id,
+            base_fee,
+            max_priority_fee_per_gas,
+            max_fee_per_gas,
+            bribe_amount,
+            simulated_sandwich.revenue,
+            simulated_sandwich.profit,
+            simulated_sandwich.gas_cost,
+            simulated_sandwich.front_gas_used,
+            simulated_sandwich.back_gas_used,
+            &final_batch_sandwich.sandwiches,  // Changed from &victim_txs to actual sandwiches
+            &bundle_request_json,
+        ) {
+            warn!("Failed to log sandwich data to CSV: {:?}", e);
+        }
+
     }
 
     Ok(())

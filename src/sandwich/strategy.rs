@@ -5,7 +5,7 @@ use ethers::{
     types::{BlockNumber, H160, H256, U256, U64},
 };
 use log::{info, warn};
-use std::{collections::HashMap, str::FromStr, sync::Arc};
+use std::{collections::HashMap, str::FromStr, path::PathBuf, sync::Arc};
 use tokio::sync::broadcast::Sender;
 
 use crate::common::alert::Alert;
@@ -21,6 +21,7 @@ use crate::sandwich::simulation::{extract_swap_info, PendingTxInfo, Sandwich};
 
 pub async fn run_sandwich_strategy(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
     let env = Env::new();
+    let mev_opprotunity_log_path = Some(PathBuf::from(env.mev_opportunity_log_path));
 
     let (pools, prev_pool_id) = load_all_pools(env.wss_url.clone(), 10000000, 50000)
         .await
@@ -214,6 +215,7 @@ pub async fn run_sandwich_strategy(provider: Arc<Provider<Ws>>, event_sender: Se
                                 &promising_sandwiches,
                                 &mut simulated_bundle_ids,  
                                 &pending_txs,
+                                mev_opprotunity_log_path.clone(),
                             )
                             .await
                             {

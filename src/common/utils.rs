@@ -1,11 +1,14 @@
+use crate::sandwich::simulation::Sandwich;
 use anyhow::Result;
 use ethers::core::rand::thread_rng;
 use ethers::prelude::*;
+
 use ethers::{
     self,
     types::{
         transaction::eip2930::{AccessList, AccessListItem},
         U256,
+        U64,
     },
 };
 use fern::colors::{Color, ColoredLevelConfig};
@@ -15,8 +18,19 @@ use rand::Rng;
 use revm::primitives::{B160, U256 as rU256};
 use std::str::FromStr;
 use std::sync::Arc;
+use std::path::{PathBuf, Path};
+use serde_json::{json, Value};
+use std::fs::OpenOptions;
+use chrono::Utc;
+use std::fs::{self};
+
+
 
 use crate::common::constants::*;
+
+pub const DEFAULT_LOG_DIR: &str = "logs";
+pub const SANDWICH_LOG_FILENAME: &str = "mev_opportunity.csv";
+
 
 pub fn setup_logger() -> Result<()> {
     let colors = ColoredLevelConfig {
@@ -224,3 +238,114 @@ pub fn return_main_and_target_currency(token0: H160, token1: H160) -> Option<(H1
         return Some((token1, token0));
     }
 }
+
+
+pub fn log_sandwich_data_to_csv(
+    file_path: &str,
+    block_number: U64,
+    sandwiches_count: usize,
+    bundle_id: &str,
+    base_fee: U256,
+    priority_fee: U256,
+    max_fee: U256,
+    bribe_amount: U256,
+    revenue: i128,
+    profit: i128,
+    gas_cost: i128,
+    front_gas: u64,
+    back_gas: u64,
+    sandwiches: &Vec<Sandwich>,  // Changed to accept Vec<Sandwich>
+    bundle_request_json: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let path = Path::new(file_path);
+    
+    // Ensure the parent directory exists
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+
+    // Check if the file exists
+    let file_exists = path.exists();
+
+    // Open the file with options to append and create if it doesn't exist
+    let file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open(file_path)?;
+
+    // Create a CSV writer with headers if the file didn't exist
+    let mut wtr = csv::WriterBuilder::new()
+        .has_headers(!file_exists)
+        .from_writer(file);
+
+    // Write headers if the file didn't exist
+    if !file_exists {
+        wtr.write_record(&[
+            "timestamp",
+            "block_number",
+            "sandwiches_count",
+            "bundle_id",
+            "base_fee",
+            "priority_fee",
+            "max_fee",
+            "bribe_amount",
+            "revenue",
+            "profit",
+            "gas_cost",
+            "front_gas",
+            "back_gas",
+            "sandwiches",
+            "bundle_request_json"
+        ])?;
+    }
+
+    // Convert sandwiches to a JSON string
+    let sandwiches_json = json!({
+        "sandwiches": sandwiches.iter().map(|sandwich| {
+            json!({
+                "victim_tx": {
+                    "tx_hash": format!("{:?}", sandwich.victim_tx.tx_hash),
+                    "from": format!("{:?}", sandwich.victim_tx.from),
+                    "to": format!("{:?}", sandwich.victim_tx.to),
+                    "value": sandwich.victim_tx.value.to_string(),
+                    "gas_price": sandwich.victim_tx.gas_price.to_string(),
+                    "gas_limit": sandwich.victim_tx.gas_limit.map(|g| g.to_string()).unwrap_or_default()
+                },
+                "amount_in": sandwich.amount_in.to_string(),
+                "swap_info": {
+                    "target_pair": format!("{:?}", sandwich.swap_info.target_pair),
+                    "main_currency": format!("{:?}", sandwich.swap_info.main_currency)
+                }
+            })
+        }).collect::<Vec<Value>>()
+    }).to_string();
+
+    // Write the data record
+    wtr.write_record(&[
+        Utc::now().to_rfc3339(),
+        block_number.to_string(),
+        sandwiches_count.to_string(),
+        bundle_id.to_string(),
+        base_fee.to_string(),
+        priority_fee.to_string(),
+        max_fee.to_string(),
+        bribe_amount.to_string(),
+        revenue.to_string(),
+        profit.to_string(),
+        gas_cost.to_string(),
+        front_gas.to_string(),
+        back_gas.to_string(),
+        sandwiches_json,
+        bundle_request_json.to_owned(),
+    ])?;
+
+    // Flush the writer to ensure all data is written to the file
+    wtr.flush()?;
+    Ok(())
+}
+
+pub fn get_default_sandwich_log_path() -> PathBuf {
+    PathBuf::from(DEFAULT_LOG_DIR).join(SANDWICH_LOG_FILENAME)
+}
+

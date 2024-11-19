@@ -8,7 +8,7 @@ use ethers::types::{transaction::eip2930::AccessList, Bytes, H160, H256, I256, U
 use log::info;
 use revm::primitives::{Bytecode, U256 as rU256};
 use std::{collections::HashMap, default::Default, str::FromStr, sync::Arc};
-
+use serde::Serialize; 
 use crate::common::bytecode::SANDOOO_BYTECODE;
 use crate::common::constants::{USDC, USDT};
 use crate::common::evm::{EvmSimulator, Tx, VictimTx};
@@ -24,13 +24,13 @@ pub struct PendingTxInfo {
     pub touched_pairs: Vec<SwapInfo>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum SwapDirection {
     Buy,
     Sell,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SwapInfo {
     pub tx_hash: H256,
     pub target_pair: H160,
@@ -41,10 +41,11 @@ pub struct SwapInfo {
     pub direction: SwapDirection,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Sandwich {
     pub amount_in: U256,
     pub swap_info: SwapInfo,
+    #[serde(skip)]  // Skip serializing this field
     pub victim_tx: VictimTx,
     pub optimized_sandwich: Option<OptimizedSandwich>,
 }
@@ -67,7 +68,7 @@ pub struct SimulatedSandwich {
     pub back_calldata: Bytes,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]  // Add Serialize here
 pub struct OptimizedSandwich {
     pub amount_in: U256,
     pub max_revenue: U256,
