@@ -530,7 +530,7 @@ impl BatchSandwich {
                 _ => AccessList::default(),
             },
         };
-        simulator.set_access_list(front_access_list.clone());
+        simulator.set_access_list(front_access_list.clone()); // for saving gas cost
         let front_gas_used = match simulator.call(front_tx) {
             Ok(result) => result.gas_used,
             Err(_) => 0,
@@ -585,7 +585,7 @@ impl BatchSandwich {
             },
         };
         let back_access_list = back_access_list.clone();
-        simulator.set_access_list(back_access_list.clone());
+        simulator.set_access_list(back_access_list.clone()); // for saving gas cost
         let back_gas_used = match simulator.call(back_tx) {
             Ok(result) => result.gas_used,
             Err(_) => 0,
