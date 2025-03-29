@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" version="26.0.5">
   <diagram name="Page-1" id="zgckrhe_6N9PWMuFcXIP">
-    <mxGraphModel dx="4639" dy="2707" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3059" dy="1893" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -301,8 +301,22 @@
         <mxCell id="XrN3ZlYORd_J-IJ9S5LN-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.411;entryY=0.039;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="XrN3ZlYORd_J-IJ9S5LN-14" target="XrN3ZlYORd_J-IJ9S5LN-37">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="XrN3ZlYORd_J-IJ9S5LN-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="XrN3ZlYORd_J-IJ9S5LN-44" target="XrN3ZlYORd_J-IJ9S5LN-52">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-1370.0000000000002" y="1029.9999999999995" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="XrN3ZlYORd_J-IJ9S5LN-44" value="flashbot builders" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-1430" y="890" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XrN3ZlYORd_J-IJ9S5LN-54" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="XrN3ZlYORd_J-IJ9S5LN-52" target="XrN3ZlYORd_J-IJ9S5LN-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XrN3ZlYORd_J-IJ9S5LN-52" value="relayers" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1430.0000000000002" y="999.9999999999995" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XrN3ZlYORd_J-IJ9S5LN-53" value="ETH validator" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-1430.0000000000002" y="1139.9999999999995" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
